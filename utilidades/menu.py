@@ -7,12 +7,12 @@ def menu():
   opcion = input("\nSelecciona una opción (1-4): ")
   
   if opcion == '1':
-      print("Reservando habitación...")
+      print("Mostrando servicios...")
   elif opcion == '2':
-      print("Consultando disponibilidad...")
+      print("Reserva...")
   elif opcion == '3':
-      print("Cancelando reserva...")
+      print("Mostrando contactos...")
   elif opcion == '4':
-      print("Saliendo del sistema...")
+      print("Saliendo...")
   else:
       print("Opción no válida, por favor intenta de nuevo.")
