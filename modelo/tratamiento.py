@@ -1,20 +1,22 @@
 class Tratamiento:
-  _contador = 1
   _tratamientos: list["Tratamiento"] = []
   
-  def __init__(self, nombre: str, descripcion: str, precio: float, duracion: int):
+  def __init__(self, nombre: str, descripcion: str, precio: float, duracion: int, id=None):
     self._nombre = nombre
     self._descripcion = descripcion
     self._precio = precio
     self._duracion = duracion
-    self._id = Tratamiento._contador
-    Tratamiento._contador += 1
+    self._id = id
     Tratamiento._tratamientos.append(self)
 
   @classmethod
   def listar_tratamientos(cls):
     return cls._tratamientos
-  
+
+  @property
+  def id(self):
+    return self._id
+
   @property
   def nombre(self) -> str:
     return self._nombre

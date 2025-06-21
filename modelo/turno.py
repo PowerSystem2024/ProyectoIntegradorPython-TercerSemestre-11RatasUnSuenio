@@ -4,7 +4,8 @@ from modelo.tratamiento import Tratamiento
 class Turno:
   _turnos: list["Turno"] = []
   
-  def __init__(self, cliente: "Cliente", dia: str, hora: str, tratamiento: "Tratamiento"):
+  def __init__(self, cliente: "Cliente", dia: str, hora: str, tratamiento: "Tratamiento", id=None):
+    self._id = id
     self._cliente = cliente
     self._tratamiento = tratamiento
     self._dia = dia
@@ -14,7 +15,11 @@ class Turno:
   @classmethod
   def listar_turnos(cls):
     return cls._turnos
-  
+
+  @property
+  def id(self):
+    return self._id
+
   @property
   def cliente(self) -> Cliente:
     return self._cliente

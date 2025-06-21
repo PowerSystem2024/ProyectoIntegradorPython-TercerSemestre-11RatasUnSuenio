@@ -1,10 +1,6 @@
 class Cliente:
-    _contador = 1  # Variable de clase para generar IDs únicos
-
-    def __init__(self, nombre, apellido, correo, telefono):
-        self._id = Cliente._contador
-        Cliente._contador += 1
-
+    def __init__(self, nombre, apellido, correo, telefono, id=None):
+        self._id = id
         self._nombre = nombre
         self._apellido = apellido
         self._correo = correo
