@@ -4,7 +4,7 @@ from modelo.tratamiento import Tratamiento
 class Turno:
   _turnos: list["Turno"] = []
   
-  def __init__(self, cliente: "Cliente", tratamiento: "Tratamiento", dia: str, hora: str):
+  def __init__(self, cliente: "Cliente", dia: str, hora: str, tratamiento: "Tratamiento"):
     self._cliente = cliente
     self._tratamiento = tratamiento
     self._dia = dia
@@ -30,10 +30,11 @@ class Turno:
   @property
   def hora(self) -> str:
     return self._hora
-  
+
   def __str__(self) -> str:
-    return (
-      f"Turno para: {self._cliente.nombre}\n"
-      f"\t{self._tratamiento}\n"
-      f"\tDía: {self._dia}, Hora: {self._hora}"
-    )
+    sb = []
+    sb.append("Turno:")
+    sb.append(f"\t Fecha: {self._dia}/10/24  Hora: {self._hora.strip()}")
+    sb.append(str(self._cliente))  # Esto depende de que Cliente también tenga __str__
+    sb.append(str(self._tratamiento))  # Esto depende de que Tratamiento también tenga __str__
+    return "\n".join(sb)

@@ -50,10 +50,10 @@ class Tratamiento:
   def __str__(self) -> str:
     return (
       f"Tratamiento {self._id}:\n"
-      f"\tNombre: {self._nombre}, Descripcion: {self._descripcion}, "
-      f"Precio: ${self._precio}, Duración: {self._duracion} minutos"
+      f"\tNombre: {self._nombre} \n\tDescripcion: {self._descripcion} "
+      f"\n\tDuración: {self._duracion} minutos \n\tPrecio: ${self._precio} \n"
     )
 
 Tratamiento("Reflexología","Terapia para tratar puntos dolorosos a través de masajes podales",7000, 60);
 Tratamiento("Masaje descontracturante", "Ideal para relajar la musculatura y disolver contracturas",10000, 60);
-Tratamiento("Pulido corporal e hidratación", "Tratamiento corporal hiper estimulante que elimina las células muertas",10000,60)
+Tratamiento("Pulido corporal e hidratación", "Tratamiento corporal hiper estimulante que elimina las células muertas",23000,60)
