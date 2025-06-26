@@ -38,6 +38,7 @@ def crear_tablas():
     );
     """)
 
+    # ✅ Confirmamos la creación antes de insertar nada
     conexion.commit()
     cursor.close()
     print("✔ Tablas creadas.")
@@ -48,7 +49,6 @@ def crear_tablas():
         Tratamiento("Masaje descontracturante", "Ideal para relajar la musculatura y disolver contracturas", 10000, 60),
         Tratamiento("Pulido corporal e hidratación", "Tratamiento corporal hiper estimulante que elimina las células muertas", 23000, 60),
     ]
-
     for tratamiento in tratamientos:
         if not TratamientoDAO.existe(tratamiento.nombre):
             TratamientoDAO.guardar(tratamiento)

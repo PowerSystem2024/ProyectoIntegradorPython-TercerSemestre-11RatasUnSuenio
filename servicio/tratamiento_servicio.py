@@ -1,12 +1,13 @@
 from utilidades.utils import Utilidades
-from modelo.tratamiento import Tratamiento
 from servicio.turno_servicio import TurnoServicio
+from dao.tratamiento_dao import TratamientoDAO
 
 class TratamientoServicio:
     @staticmethod
     def mostrar_tratamientos():
         Utilidades.encabezado("Tratamientos")
-        for tratamiento in Tratamiento.listar_tratamientos():
+
+        for tratamiento in TratamientoDAO.obtener_todos():
             print(tratamiento)
 
         print("¿Cómo desea continuar? ")
@@ -23,4 +24,3 @@ class TratamientoServicio:
             TurnoServicio.reservar_turno()
         elif opcion == 2:
             print("Volviendo al menú principal...\n")
-            return
