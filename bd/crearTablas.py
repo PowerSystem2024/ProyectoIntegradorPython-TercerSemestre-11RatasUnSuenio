@@ -5,7 +5,7 @@ from dao.tratamiento_dao import TratamientoDAO
 def crear_tablas():
     cursor = conexion.cursor()
 
-    # Creamos tabla de cliente
+    # Crear tabla cliente
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cliente (
         id SERIAL PRIMARY KEY,
@@ -16,7 +16,7 @@ def crear_tablas():
     );
     """)
 
-    # Creamos tabla de tratamiento
+    # Crear tabla tratamiento
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS tratamiento (
         id SERIAL PRIMARY KEY,
@@ -27,7 +27,7 @@ def crear_tablas():
     );
     """)
 
-    # Creamos tabla de turnos
+    # Crear tabla turno
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS turno (
         id SERIAL PRIMARY KEY,
@@ -43,15 +43,12 @@ def crear_tablas():
     cursor.close()
     print("✔ Tablas creadas.")
 
-
-# 👇 Esto va *fuera* de la función, o se puede llamar desde main.py luego
-tratamientos = [
-    Tratamiento("Reflexología", "Terapia para tratar puntos dolorosos a través de masajes podales", 7000, 60),
-    Tratamiento("Masaje descontracturante", "Ideal para relajar la musculatura y disolver contracturas", 10000, 60),
-    Tratamiento("Pulido corporal e hidratación", "Tratamiento corporal hiper estimulante que elimina las células muertas", 23000, 60),
-]
-
-def insertar_tratamientos_predeterminados():
+    # 👇 Esto se ejecuta DESPUÉS de crear las tablas
+    tratamientos = [
+        Tratamiento("Reflexología", "Terapia para tratar puntos dolorosos a través de masajes podales", 7000, 60),
+        Tratamiento("Masaje descontracturante", "Ideal para relajar la musculatura y disolver contracturas", 10000, 60),
+        Tratamiento("Pulido corporal e hidratación", "Tratamiento corporal hiper estimulante que elimina las células muertas", 23000, 60),
+    ]
     for tratamiento in tratamientos:
         if not TratamientoDAO.existe(tratamiento.nombre):
             TratamientoDAO.guardar(tratamiento)
