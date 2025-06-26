@@ -1,9 +1,9 @@
 from utilidades.menu import menu
-from bd.crearTablas import crear_tablas
+from bd.crearTablas import crear_tablas, insertar_tratamientos_predeterminados
 
 if __name__ == '__main__':
-
-    crear_tablas() # Creamos todas las tablas antes de iniciar el programa
+    crear_tablas()
+    insertar_tratamientos_predeterminados()
 
     print("=================================================")
     print("********** 11 Sueños **********".center(50))

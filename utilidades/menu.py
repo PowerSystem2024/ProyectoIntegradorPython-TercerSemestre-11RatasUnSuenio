@@ -1,3 +1,4 @@
+from utilidades.contacto import Contacto
 from servicio.tratamiento_servicio import TratamientoServicio
 def menu():
     opcion = 0
@@ -16,7 +17,7 @@ def menu():
         elif opcion == 2:
             print("Reserva Online...")
         elif opcion == 3:
-            print("Mostrando contactos...")
+            Contacto.contacto()
         elif opcion == 4:
             print("¡Gracias por usar nuestros servicios!")
         else:
