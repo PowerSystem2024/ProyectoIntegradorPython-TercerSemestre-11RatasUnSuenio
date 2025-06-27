@@ -2,12 +2,19 @@ from servicio.cliente_servicio import ClienteServicio
 from utilidades.utils import Utilidades
 from modelo.turno import Turno
 from dao.tratamiento_dao import TratamientoDAO  # USAMOS DAO
+from dao.turno_dao import TurnoDAO
+from datetime import date, datetime, timedelta
+from dao.cliente_dao import ClienteDAO
+import calendar
 import random
 import time
 
 class TurnoServicio:
     @staticmethod
     def reservar_turno():
+        hoy = date.today()
+        anio = hoy.year
+        mes = hoy.month
         continua_reservando = True
 
         while continua_reservando:
@@ -15,6 +22,7 @@ class TurnoServicio:
             nuevo_cliente = ClienteServicio.cargar_cliente()
 
             tratamientos_disponibles = TratamientoDAO.obtener_todos()
+            clientes_disponibles = ClienteDAO.obtener_todos()
 
             while True:
                 Utilidades.encabezado("Reserva Online")
@@ -34,11 +42,19 @@ class TurnoServicio:
             tratamiento_elegido = tratamientos_disponibles[tratamiento_indice - 1]
             print("\n+ Ingresa la fecha\n¡A continuación se le mostrarán los turnos disponibles!")
 
-            cronograma = llenar_matrices()
             turnos = cargar_turnos()
+            dias_del_mes = calendar.monthrange(anio, mes)[1]
+            cronograma = llenar_matrices(
+                dias_del_mes,
+                turnos,
+                anio,
+                mes,
+                clientes_disponibles,
+                tratamientos_disponibles
+            )
 
             while True:
-                mostrar_turnos(turnos, cronograma)
+                mostrar_turnos(turnos, cronograma, anio, mes)
                 try:
                     dia = int(input("\nIngresa el día de tu reserva: "))
                     if validar_dia_cerrado(dia - 1, cronograma):
@@ -62,8 +78,9 @@ class TurnoServicio:
                     break
                 except ValueError:
                     print("Hora inválida")
-
-            nuevo_turno = Turno(nuevo_cliente, dia, turnos[turno_hora - 1], tratamiento_elegido)
+            fecha_turno = date(anio, mes, dia)
+            nuevo_turno = Turno(nuevo_cliente, fecha_turno, turnos[turno_hora - 1].strip(), tratamiento_elegido)
+            TurnoDAO.guardar(nuevo_turno)
             print("\n+ Reserva registrada\n")
             time.sleep(0.5)
             print(nuevo_turno)
@@ -77,38 +94,41 @@ class TurnoServicio:
         time.sleep(2)
         print("Volviendo al menú principal...")
 
-def mostrar_turnos(turnos, cronograma):
-    num_dias = 30
-    num_turnos = 7
-    cont1 = 0
-    dias = ["Sab ", "Dom ", "Lun ", "Mar ", "Mie ", "Jue ", "Vie "]
+def mostrar_turnos(turnos, cronograma, anio, mes):
+    dias_semana = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
+    nombre_mes = calendar.month_name[mes]
+
+    ROJO = '\033[91m'
+    VERDE = '\033[92m'
+    RESET = '\033[0m'
 
     print()
-    print("                                                  ___________________")
-    print("                                                 | Septiembre / 2024 |")
+    print(f"                                                  ___________________")
+    print(f"                                                 | {nombre_mes} / {anio} |")
     print("       ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯")
-    print(f"Día\\Hs | {turnos[0]} || {turnos[1]} || {turnos[2]} || {turnos[3]} || {turnos[4]} || {turnos[5]} || {turnos[6]} |")
+    print(f"Día\\Hs | {' || '.join([f'{hora:^11}' for hora in turnos])} |")
 
-    for i in range(num_dias):
-        print("       " + "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯" * num_turnos)
+    for i, fila in enumerate(cronograma):
+        dia_actual = date(anio, mes, i + 1)
+        dia_nombre = dias_semana[dia_actual.weekday()]
+        dia_num = f"{i + 1:2d}:"
 
-        dia_nombre = dias[cont1]
-        dia_num = f"{i + 1}: " if i < 9 else f"{i + 1}:"
-        print(f"{dia_nombre}{dia_num}", end='')
+        print("       " + "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯" * len(turnos))
+        print(f"{dia_nombre} {dia_num}", end='')
 
-        for j in range(num_turnos):
-            turno = cronograma[i][j]
-            if turno != "":
-                print(f"|{turno}|", end='')
+        for estado in fila:
+            if estado.strip() == "":
+                texto = f"{VERDE} Disponible {RESET}"
+            elif estado.strip() == "Reservado":
+                texto = f"{ROJO}Reservado{RESET}  "
             else:
-                print("|             |", end='')
+                texto = estado  # "Cerrado" u otro valor
+
+            print(f"| {texto:^11} |", end='')
 
         print()
 
-        if i == 29:
-            print("       " + "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯" * num_turnos)
-
-        cont1 = (cont1 + 1) % 7
+    print("       " + "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯" * len(turnos))
 
 def cargar_turnos():
     return [
@@ -121,23 +141,23 @@ def cargar_turnos():
         "   18:00   "
     ]
 
-def llenar_matrices():
-    cronograma = [['' for _ in range(7)] for _ in range(30)]
-    cont = 0
-    cont1 = 1
+def llenar_matrices(dias_mes, turnos, anio, mes, clientes, tratamientos):
+    cronograma = [['' for _ in range(len(turnos))] for _ in range(dias_mes)]
+    turnos_reservados = TurnoDAO.obtener_todos(clientes, tratamientos)
 
-    for i in range(len(cronograma)):
-        for j in range(len(cronograma[0])):
-            num_azar = random.randint(0, 1)
-            if i != cont and i != cont1:
-                cronograma[i][j] = "             " if num_azar == 0 else "  Reservado  "
+    for i in range(dias_mes):
+        dia_actual = date(anio, mes, i + 1)
+        es_finde = dia_actual.weekday() in [5, 6]
+
+        for j, hora in enumerate(turnos):
+            if es_finde:
+                cronograma[i][j] = "Cerrado"
             else:
-                cronograma[i][j] = "   Cerrado   "
-
-        if i == cont:
-            cont += 7
-        if i == cont1:
-            cont1 += 7
+                reservado = any(
+                    t.fecha == dia_actual and t.hora.strftime("%H:%M") == hora
+                    for t in turnos_reservados
+                )
+                cronograma[i][j] = "Reservado" if reservado else ""
 
     return cronograma
 

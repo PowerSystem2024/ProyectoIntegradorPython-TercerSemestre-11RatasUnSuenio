@@ -1,5 +1,7 @@
 from utilidades.utils import Utilidades
 from modelo.cliente import Cliente
+from dao.cliente_dao import ClienteDAO
+
 
 class ClienteServicio:
     @staticmethod
@@ -28,4 +30,6 @@ class ClienteServicio:
                 break
             print("\n-- El número de teléfono es inválido --\n")
 
-        return Cliente(nombre, apellido, correo, telefono)
+        cliente = Cliente(nombre, apellido, correo, telefono)
+        ClienteDAO.guardar(cliente)
+        return cliente
