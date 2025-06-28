@@ -31,7 +31,7 @@ class TurnoDAO:
         resultados = cursor.fetchall()
         cursor.close()
 
-        # Mapeo por id para acceder rápido
+        # Mapeo por id
         cliente_map = {c.id: c for c in clientes}
         tratamiento_map = {t.id: t for t in tratamientos}
 
@@ -39,5 +39,5 @@ class TurnoDAO:
         for id, cliente_id, tratamiento_id, fecha, hora in resultados:
             cliente = cliente_map.get(cliente_id)
             tratamiento = tratamiento_map.get(tratamiento_id)
-            turnos.append(Turno(cliente, str(fecha), str(hora), tratamiento, id))
+            turnos.append(Turno(cliente, fecha, hora, tratamiento, id))
         return turnos
