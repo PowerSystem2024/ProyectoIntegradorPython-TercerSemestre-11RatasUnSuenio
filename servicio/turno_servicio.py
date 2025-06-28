@@ -1,12 +1,11 @@
 from servicio.cliente_servicio import ClienteServicio
 from utilidades.utils import Utilidades
 from modelo.turno import Turno
-from dao.tratamiento_dao import TratamientoDAO  # USAMOS DAO
+from dao.tratamiento_dao import TratamientoDAO
 from dao.turno_dao import TurnoDAO
-from datetime import date, datetime, timedelta
 from dao.cliente_dao import ClienteDAO
+from datetime import date
 import calendar
-import random
 import time
 
 class TurnoServicio:
@@ -78,6 +77,7 @@ class TurnoServicio:
                     break
                 except ValueError:
                     print("Hora inválida")
+
             fecha_turno = date(anio, mes, dia)
             nuevo_turno = Turno(nuevo_cliente, fecha_turno, turnos[turno_hora - 1].strip(), tratamiento_elegido)
             TurnoDAO.guardar(nuevo_turno)
@@ -94,7 +94,11 @@ class TurnoServicio:
         time.sleep(2)
         print("Volviendo al menú principal...")
 
+
 def mostrar_turnos(turnos, cronograma, anio, mes):
+    import calendar
+    from datetime import date
+
     dias_semana = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
     nombre_mes = calendar.month_name[mes]
 
@@ -102,44 +106,53 @@ def mostrar_turnos(turnos, cronograma, anio, mes):
     VERDE = '\033[92m'
     RESET = '\033[0m'
 
-    print()
-    print(f"                                                  ___________________")
-    print(f"                                                 | {nombre_mes} / {anio} |")
-    print("       ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯")
-    print(f"Día\\Hs | {' || '.join([f'{hora:^11}' for hora in turnos])} |")
+    ancho_col = 14 
+    ancho_dia = 10 
+    columnas = len(turnos)
+    ancho_total = ancho_dia + (ancho_col + 1) * columnas + 1
+
+    print("+" + "-" * (ancho_total - 2) + "+")  #cambio de titulo 
+    titulo = f"{nombre_mes} / {anio}"
+    print("|" + titulo.center(ancho_total - 2) + "|")
+    print("+" + "-" * ancho_dia + "+" + ("-" * ancho_col + "+") * columnas)
+
+    encabezado = f"| {'Día-Hora':<{ancho_dia}}|" + "".join([f" {hora:^{ancho_col - 1}}|" for hora in turnos])
+    print(encabezado)
+    print("+" + "-" * ancho_dia + "+" + ("-" * ancho_col + "+") * columnas)
 
     for i, fila in enumerate(cronograma):
         dia_actual = date(anio, mes, i + 1)
         dia_nombre = dias_semana[dia_actual.weekday()]
-        dia_num = f"{i + 1:2d}:"
-
-        print("       " + "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯" * len(turnos))
-        print(f"{dia_nombre} {dia_num}", end='')
+        dia_texto = f"{dia_nombre} {i+1}"
+        linea = f"| {dia_texto:<{ancho_dia - 1}}|"
 
         for estado in fila:
-            if estado.strip() == "":
-                texto = f"{VERDE} Disponible {RESET}"
-            elif estado.strip() == "Reservado":
-                texto = f"{ROJO}Reservado{RESET}  "
+            estado = estado.strip()
+            if estado == "":
+                texto_plano = "Disponible"
+                texto = f"{VERDE}{texto_plano:^{ancho_col - 1}}{RESET}"
+            elif estado == "Reservado":
+                texto_plano = "Reservado"
+                texto = f"{ROJO}{texto_plano:^{ancho_col - 1}}{RESET}"
+            elif estado == "Cerrado":
+                texto_plano = "Cerrado"
+                texto = f"{texto_plano:^{ancho_col - 1}}"
             else:
-                texto = estado  # "Cerrado" u otro valor
+                texto_plano = estado
+                texto = f"{texto_plano:^{ancho_col - 1}}"
 
-            print(f"| {texto:^11} |", end='')
+            linea += f"{texto}|"
 
-        print()
+        print(linea)
+        # Línea separadora después de cada fila
+        print("+" + "-" * ancho_dia + "+" + ("-" * ancho_col + "+") * columnas)
 
-    print("       " + "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯" * len(turnos))
 
 def cargar_turnos():
     return [
-        "   09:00   ",
-        "   10:30   ",
-        "   12:00   ",
-        "   13:30   ",
-        "   15:00   ",
-        "   16:30   ",
-        "   18:00   "
+        "09:00", "10:30", "12:00", "13:30", "15:00", "16:30", "18:00"
     ]
+
 
 def llenar_matrices(dias_mes, turnos, anio, mes, clientes, tratamientos):
     cronograma = [['' for _ in range(len(turnos))] for _ in range(dias_mes)]
@@ -161,14 +174,16 @@ def llenar_matrices(dias_mes, turnos, anio, mes, clientes, tratamientos):
 
     return cronograma
 
+
 def validar_dia_cerrado(dia, cronograma):
-    return all(cronograma[dia][i] == "   Cerrado   " for i in range(7))
+    return all(celda.strip() == "Cerrado" for celda in cronograma[dia])
+
 
 def comprobar_fecha_turno(dia, turno, cronograma):
-    if cronograma[dia][turno] == "  Reservado  ":
+    if cronograma[dia][turno].strip() == "Reservado":
         print("\n--- El día y turno seleccionado están reservados. Por favor ingrese otro día o turno ---")
         time.sleep(1.5)
         return True
     else:
-        cronograma[dia][turno] = "  Reservado  "
+        cronograma[dia][turno] = "Reservado"
         return False
